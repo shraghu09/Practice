@@ -1,0 +1,33 @@
+<h1>Auth Application</h1>
+<hr>
+
+<!-- TOP BAR -->
+<div style="display:flex; justify-content:space-between; align-items:center;">
+  <h3>Welcome, {{ username }}</h3>
+
+  <div>
+    <button (click)="loadUsers()">Users</button>
+    <button (click)="logout()">Logout</button>
+  </div>
+</div>
+
+<hr>
+
+<!-- USERS TABLE (ONLY AFTER CLICKING USERS BUTTON) -->
+<div *ngIf="showUsers">
+  <h2>All Registered Users</h2>
+
+  <table border="1" cellpadding="8">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+    </tr>
+
+    <tr *ngFor="let user of users">
+      <td>{{ user.id }}</td>
+      <td>{{ user.name }}</td>
+      <td>{{ user.email }}</td>
+    </tr>
+  </table>
+</div>

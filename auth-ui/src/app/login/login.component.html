@@ -1,0 +1,21 @@
+<h1 class="app-title">Auth Application</h1>
+
+<h2>Login</h2>
+
+<input
+  class="login-input"
+  type="email"
+  [(ngModel)]="email"
+  placeholder="Enter Email"
+/>
+
+<input
+  class="login-input"
+  type="password"
+  [(ngModel)]="password"
+  placeholder="Enter Password"
+/>
+
+<br /><br />
+
+<button class="login-btn" (click)="login()">Login</button>

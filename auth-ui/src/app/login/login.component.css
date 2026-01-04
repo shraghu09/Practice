@@ -1,0 +1,31 @@
+/* Project name in ORANGE */
+.app-title {
+  color: orange;
+  font-weight: bold;
+}
+
+/* Input text + placeholder in BLUE */
+.login-input {
+  color: blue;
+  border: 1px solid blue;
+  padding: 6px;
+  margin-right: 5px;
+}
+
+.login-input::placeholder {
+  color: blue;
+}
+
+/* Login button styling */
+.login-btn {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 6px 15px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.login-btn:hover {
+  background-color: darkorange;
+}
