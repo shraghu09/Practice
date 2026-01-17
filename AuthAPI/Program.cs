@@ -4,7 +4,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ✅ ADD THIS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
@@ -16,11 +15,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// ✅ ADD THIS (before MapControllers)
-app.UseCors("AllowAngular");
-
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
+
+app.UseCors("AllowAngular");   // ✅ keep this before MapControllers
 
 app.MapControllers();
 
