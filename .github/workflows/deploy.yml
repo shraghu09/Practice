@@ -1,38 +1,72 @@
-name: Deploy .NET API to EC2
+name: Deploy Angular + .NET API to EC2
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch: {}   # ✅ Run workflow button
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # ✅ Step 1: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH
+      # ✅ Step 2: Build Angular Frontend (auth-ui)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies & Build Angular
+        working-directory: auth-ui
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          npm install
+          npm run build -- --configuration production
 
-      - name: Deploy to EC2
+      # ✅ Step 3: Publish .NET Backend (AuthAPI)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore & Publish .NET API
+        working-directory: AuthAPI
         run: |
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            set -e
+          dotnet restore
+          dotnet publish -c Release -o publish
 
-            echo "✅ Connected to EC2"
+      # ✅ Step 4: Copy Angular dist to EC2
+      - name: Copy Angular build to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "auth-ui/dist/**"
+          target: "/var/www/authui"
 
-            # Go to project folder
-            cd /var/www/authapi/Practice/AuthAPI
+      # ✅ Step 5: Copy .NET publish files to EC2
+      - name: Copy .NET API publish to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "AuthAPI/publish/**"
+          target: "/var/www/authapi"
 
-            echo "✅ Pulling latest code"
-            git pull origin main
-
-            echo "✅ Publish project"
-            dotnet publish -c Release -o /var/www/authapi/publish
-
-            echo "✅ Restarting se
+      # ✅ Step 6: Restart services on EC2
+      - name: Restart API and Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            sudo systemctl restart authapi
+            sudo systemctl restart nginx
+            sudo systemctl status authapi --no-pager
+            echo "✅ Deployment completed successfully"
