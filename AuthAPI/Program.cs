@@ -23,7 +23,7 @@ builder.Services.AddCors(options =>
         policy => policy
             .WithOrigins(
                 "http://localhost:4200",      // ✅ Angular local
-                "http://35.154.86.183"        // ✅ Angular hosted on EC2
+                "http://13.127.194.181"        // ✅ Angular hosted on EC2
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
